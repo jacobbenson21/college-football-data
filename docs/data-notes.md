@@ -38,6 +38,10 @@ The games endpoint includes **future, unplayed games**. They have
   nothing for an unplayed game).
 - Rule: filter `WHERE completed = true` before building the fact table, or nulls
   corrupt aggregations and break `not_null` tests.
+- This happens even in *finished* seasons: 2024 has 874 games but only 873
+  completed. The odd one out is App State vs Liberty (week 5, game 401640992),
+  cancelled by Hurricane Helene — `completed: false`, null scores, no team stats.
+  Don't assume "past season = every game played."
 
 ## Stats are "long" (EAV) and string-typed
 
