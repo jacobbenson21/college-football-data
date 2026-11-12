@@ -1,0 +1,50 @@
+{
+  "id": 333,
+  "school": "Alabama",
+  "mascot": "Crimson Tide",
+  "abbreviation": "ALA",
+  "alternateNames": [
+    "ALA",
+    "Alabama"
+  ],
+  "conference": "SEC",
+  "division": null,
+  "classification": "fbs",
+  "color": "#9e1b32",
+  "alternateColor": "#ffffff",
+  "logos": [
+    "https://cdn.collegefootballdata.com/logos/500/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/500/333.png",
+    "https://cdn.collegefootballdata.com/logos/256/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/256/333.png",
+    "https://cdn.collegefootballdata.com/logos/128/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/128/333.png",
+    "https://cdn.collegefootballdata.com/logos/96/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/96/333.png",
+    "https://cdn.collegefootballdata.com/logos/64/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/64/333.png",
+    "https://cdn.collegefootballdata.com/logos/48/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/48/333.png",
+    "https://cdn.collegefootballdata.com/logos/32/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/32/333.png",
+    "https://cdn.collegefootballdata.com/logos/16/333.png",
+    "https://cdn.collegefootballdata.com/logos-dark/16/333.png"
+  ],
+  "twitter": "@AlabamaFTBL",
+  "location": {
+    "id": 3657,
+    "name": "Bryant-Denny Stadium",
+    "city": "Tuscaloosa",
+    "state": "AL",
+    "zip": "35487",
+    "countryCode": "US",
+    "timezone": "America/Chicago",
+    "latitude": 33.2082752,
+    "longitude": -87.5503836,
+    "elevation": "70.05136108",
+    "capacity": 101821,
+    "constructionYear": 1929,
+    "grass": true,
+    "dome": false
+  }
+}

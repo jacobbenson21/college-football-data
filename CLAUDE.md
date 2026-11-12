@@ -25,7 +25,8 @@ CollegeFootballData API
 
 ## v1 scope
 
-- Datasets: teams, games, team game stats. 2–3 seasons.
+- Datasets: teams, games, team game stats. Use the `classification=fbs` filter (keeps it to ~134 teams / ~874 games per season).
+- Seasons: backfill completed seasons 2022, 2023, 2024 first, then add the current (2026) season as a live source that grows weekly as games complete. Build the pipeline on the immutable backfill before introducing the live season.
 - dbt models: `stg_teams`, `stg_games`, `stg_game_stats` -> `dim_teams`, `dim_games`, `fact_game_stats`.
 - dbt tests: unique + not_null on keys, relationships from fact to dims.
 - Airflow DAG: ingest -> upload_raw -> spark_process -> load_snowflake -> dbt_run -> dbt_test. Retries on API and load tasks; weekly schedule.
@@ -36,7 +37,9 @@ CollegeFootballData API
 
 ## Key decisions and constraints
 
-- CFBD free tier has a monthly API call cap. Cache raw responses and skip calls when the file already exists locally.
+- CFBD free tier allows 1000 API calls/month. Cache raw responses and skip calls when the file already exists locally. Exception: the current/live season is re-fetched each run (its `completed` flags flip and scores fill in), so caching is season-aware — past seasons cached permanently, current season always refreshed.
+- `/games` returns the full schedule including future games (`completed: false`, null scores). Filter `completed = true` before the fact table. Keep current-season loads idempotent by reloading that season by partition (drop/replace), not row-level MERGE.
+- Venue belongs to the game, not the home team: neutral-site games (`neutralSite: true`) are not at the home team's stadium. Keep game venue (`dim_games`) separate from team stadium (`dim_teams`); exclude neutral-site games from home-advantage metrics. See `docs/data-notes.md`.
 - Ingestion is parameterized by season (e.g. `--season 2024`).
 - S3 layout: `raw/<dataset>/season=<year>/` and `processed/<dataset>/`.
 - Spark runs locally on files pulled down from S3. Don't set up Spark-to-S3 (hadoop-aws) for v1.
@@ -79,6 +82,6 @@ Create folders only when they're needed.
 
 ## Current status
 
-- Phase 0 nearly done: repo cloned, `.venv` created, `requests`, `python-dotenv`, `boto3` installed, `requirements.txt` generated.
-- Remaining in Phase 0: create `.env.example` and `.env`, first commit and push.
-- Next: get the CFBD API key, then make the first authenticated request for teams and save the JSON to `data/raw/teams/`.
+- Phase 0 complete: repo, `.venv`, `.gitignore` (+ `data/`), `.env`/`.env.example`, `requirements.txt`, `CLAUDE.md` committed and pushed.
+- CFBD API key obtained and in `.env`. Explored all three endpoints via curl; real samples saved to `docs/samples/`, findings in `docs/data-notes.md`.
+- Phase 1 in progress: next is `ingestion/api_client.py` (shared auth/request helper), then `ingest_teams.py` to fetch FBS teams and save JSON to `data/raw/teams/`.
