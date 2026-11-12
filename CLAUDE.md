@@ -26,7 +26,7 @@ CollegeFootballData API
 ## v1 scope
 
 - Datasets: teams, games, team game stats. Use the `classification=fbs` filter (keeps it to ~134 teams / ~874 games per season).
-- Seasons: backfill completed seasons 2022, 2023, 2024 first, then add the current (2026) season as a live source that grows weekly as games complete. Build the pipeline on the immutable backfill before introducing the live season.
+- Seasons: backfill completed seasons 2022, 2023, 2024, 2025 first, then add the current (2026) season as a live source that grows weekly as games complete. Build the pipeline on the immutable backfill before introducing the live season.
 - dbt models: `stg_teams`, `stg_games`, `stg_game_stats` -> `dim_teams`, `dim_games`, `fact_game_stats`.
 - dbt tests: unique + not_null on keys, relationships from fact to dims.
 - Airflow DAG: ingest -> upload_raw -> spark_process -> load_snowflake -> dbt_run -> dbt_test. Retries on API and load tasks; weekly schedule.
@@ -84,4 +84,4 @@ Create folders only when they're needed.
 
 - Phase 0 complete: repo, `.venv`, `.gitignore` (+ `data/`), `.env`/`.env.example`, `requirements.txt`, `CLAUDE.md` committed and pushed.
 - CFBD API key obtained and in `.env`. Explored all three endpoints via curl; real samples saved to `docs/samples/`, findings in `docs/data-notes.md`.
-- Phase 1 in progress: next is `ingestion/api_client.py` (shared auth/request helper), then `ingest_teams.py` to fetch FBS teams and save JSON to `data/raw/teams/`.
+- Phase 1 in progress: `api_client.py` (shared auth/request helper) and `ingest_teams.py` done; teams backfilled for 2022-2025 to `data/raw/teams/season=<year>/teams.json` (season-partitioned, with skip-if-exists caching). Next: `ingest_games.py`, then `ingest_stats.py`.
