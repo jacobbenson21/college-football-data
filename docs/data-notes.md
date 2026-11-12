@@ -59,6 +59,21 @@ every value is a **string** — several are compound and need parsing:
 Transformation job: pivot the long list to wide columns, then split/parse the
 compound strings into typed values (raw → staging → analytics).
 
+## Keep filters consistent across endpoints (games vs stats)
+
+`/games` and `/games/teams` must use the **same** filters or they won't reconcile.
+Initially `ingest_games.py` passed `seasonType=regular` but `ingest_stats.py` did
+not — the stats endpoint then returned ~42-46 extra games per season (all in
+"week 1"), season-boundary games not present in `dim_games`.
+
+- Fix: pass `seasonType=regular&classification=fbs` on **both** endpoints.
+- After the fix, games and distinct stat-games reconcile 1-to-1 per season, and
+  every completed game has stats (0 orphans, 0 completed-games-missing-stats).
+- Verification worth keeping: compare `set(game ids in /games)` against
+  `set(game ids in /games/teams)` — orphans on either side mean mismatched filters.
+- Note 2024: 874 games, 873 completed, 873 stat-games — the one gap is the
+  Hurricane Helene cancellation, which correctly has no stats.
+
 ## Scope decision: backfill history, then go live
 
 - **Phase 1–6:** backfill completed seasons **2022, 2023, 2024** — immutable,

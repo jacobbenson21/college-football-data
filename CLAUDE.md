@@ -84,4 +84,4 @@ Create folders only when they're needed.
 
 - Phase 0 complete: repo, `.venv`, `.gitignore` (+ `data/`), `.env`/`.env.example`, `requirements.txt`, `CLAUDE.md` committed and pushed.
 - CFBD API key obtained and in `.env`. Explored all three endpoints via curl; real samples saved to `docs/samples/`, findings in `docs/data-notes.md`.
-- Phase 1 in progress: `api_client.py` (shared auth/request helper) and `ingest_teams.py` done; teams backfilled for 2022-2025 to `data/raw/teams/season=<year>/teams.json` (season-partitioned, with skip-if-exists caching). Next: `ingest_games.py`, then `ingest_stats.py`.
+- Phase 1 backfill complete: `api_client.py` + `ingest_teams.py`/`ingest_games.py`/`ingest_stats.py` done. Teams, games, and team game stats backfilled for 2022-2025 (season-partitioned raw JSON under `data/raw/`, skip-if-exists caching; stats partitioned by week). Games and stats reconcile 1-to-1 per season. Next: Phase 2 (S3 raw layer) or wire the live 2026 season.
