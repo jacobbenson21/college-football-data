@@ -1,0 +1,19 @@
+# Connection profile for dbt. Values come from environment variables (loaded from
+# .env), so no secrets live in this file and it is safe to commit.
+# Run dbt with the repo's .env sourced, e.g.:
+#   set -a; source .env; set +a
+#   dbt debug --project-dir dbt --profiles-dir dbt
+cfb:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      schema: ANALYTICS
+      threads: 4
+      client_session_keep_alive: false

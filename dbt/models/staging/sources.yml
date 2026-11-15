@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: cfb_raw
+    description: >
+      Raw Parquet landed from S3 by snowflake/load_raw.py. Each table holds the
+      source record as a single VARIANT column `data`, plus lineage columns
+      (season recovered from the S3 path, source_file, loaded_at).
+    database: CFB
+    schema: RAW
+    tables:
+      - name: teams
+      - name: games
+      - name: game_stats

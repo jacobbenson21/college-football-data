@@ -222,3 +222,9 @@ data/
 
 # Local AI assistant context (not for the public repo)
 CLAUDE.md
+
+# dbt artifacts
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
