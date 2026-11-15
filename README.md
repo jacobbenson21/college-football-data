@@ -50,6 +50,12 @@ CollegeFootballData API
 
 `fact_game_stats` joins to `dim_games` on `game_id` and to `dim_teams` on `team_id`.
 
+### dbt lineage
+
+Raw sources → staging (typed views) → marts (star schema), built and tested with dbt:
+
+![dbt lineage graph](docs/images/dbt_lineage.png)
+
 ## Datasets & scope
 
 - FBS teams, games, and team game stats for **2022–2025** (completed-season backfill).

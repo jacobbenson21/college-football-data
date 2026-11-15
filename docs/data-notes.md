@@ -74,6 +74,35 @@ not — the stats endpoint then returned ~42-46 extra games per season (all in
 - Note 2024: 874 games, 873 completed, 873 stat-games — the one gap is the
   Hurricane Helene cancellation, which correctly has no stats.
 
+## Nulls in fact_game_stats have three different meanings
+
+A column-by-column null audit of `fact_game_stats` (5,996 FBS-vs-FBS game-team
+rows) shows nulls that are NOT all the same thing. Verified by tracing warehouse
+nulls back to the raw JSON.
+
+1. **Event didn't happen -> effectively 0.** CFBD omits a stat category entirely
+   when its value is zero, so after the long->wide pivot the cell is null, not 0.
+   Share of rows null: `passes_intercepted`/`interception_*` ~46% (threw 0 INTs),
+   `punt_return_*` ~32%, `kick_return_*` ~21%, `total_fumbles` ~20%,
+   `fumbles_recovered` ~6%, `kicking_points` ~1.6%. Treat as 0 per metric
+   (e.g. `COALESCE(passes_intercepted, 0)`).
+2. **Not recorded -> genuinely unknown.** Defensive stats (`tackles`, `sacks`,
+   `qb_hurries`, ...) are null for ~39 rows (0.7%). A team can't have 0 tackles in
+   a real game, so these are missing, not zero. Leave null.
+3. **Missing box score -> unknown.** Core offensive stats (`rushing_yards`,
+   `total_yards`, `possession_seconds`, `first_downs`, ...) are null for exactly 2
+   rows = 1 game: Akron @ Buffalo, 2022 week 14, which has no offensive box score
+   in CFBD at all (only 6 defensive categories per team in the raw JSON).
+
+Design decision: the fact table **preserves these nulls** rather than fabricating
+zeros — a stat that is unknown is not a stat that is zero. A single blanket
+`COALESCE(x, 0)` would wrongly turn (2) and (3) into fake zeros. Null->0 is decided
+per stat downstream (metrics layer / query), not baked into the fact.
+
+`dim_games` nulls are all the "unknown" kind and left as-is: `away_pregame_elo`
+~14% (FCS / newly-promoted opponents have no prior Elo), `attendance` ~2% (not
+recorded), plus the same 1-game gap. `dim_teams` has no nulls.
+
 ## Scope decision: backfill history, then go live
 
 - **Phase 1–6:** backfill completed seasons **2022, 2023, 2024** — immutable,
