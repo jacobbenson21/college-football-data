@@ -219,3 +219,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 data/
+
+# Local AI assistant context (not for the public repo)
+CLAUDE.md
