@@ -32,7 +32,7 @@ with DAG(
     description="CollegeFootballData end-to-end pipeline: ingest -> Spark -> S3 -> Snowflake -> dbt",
     default_args=default_args,
     start_date=datetime(2024, 1, 1),
-    schedule="@weekly",
+    schedule="@daily",
     catchup=False,
     tags=["cfb"],
 ) as dag:
