@@ -6,11 +6,24 @@ dataset — it only knows how to make one authenticated call and return JSON.
 """
 
 import os
+from datetime import date
 
 import requests
 from dotenv import load_dotenv
 
 BASE_URL = "https://api.collegefootballdata.com"
+
+
+def current_season(today=None):
+    """The in-progress CFB season year. The season spans Aug-Jan, so Jan-July is
+    still the prior calendar year's season."""
+    today = today or date.today()
+    return today.year if today.month >= 8 else today.year - 1
+
+
+def is_current_season(season):
+    """True for the live/mutable season (refetch), False for finished seasons (cache)."""
+    return int(season) == current_season()
 
 # Load variables from .env into the environment once, when this module is imported.
 load_dotenv()

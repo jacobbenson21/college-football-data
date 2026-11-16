@@ -8,7 +8,7 @@ import argparse
 import json
 from pathlib import Path
 
-from api_client import get
+from api_client import get, is_current_season
 
 # Anchor output to the repo root so it works no matter where the script is run from.
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -19,8 +19,9 @@ def ingest_teams(season):
     out_dir = RAW_DIR / f"season={season}"
     out_path = out_dir / "teams.json"
 
-    # Caching: if we already pulled this season, don't spend an API call on it.
-    if out_path.exists():
+    # Caching: skip finished seasons we already have; always refetch the current
+    # (live) season since its roster/membership can still change.
+    if out_path.exists() and not is_current_season(season):
         print(f"Cached — {out_path} already exists, skipping API call.")
         return
 

@@ -12,36 +12,54 @@ import argparse
 import json
 from pathlib import Path
 
-from api_client import get
+from api_client import get, is_current_season
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "game_stats"
 GAMES_DIR = REPO_ROOT / "data" / "raw" / "games"
 
 
-def weeks_for_season(season):
-    """Read the saved games file to learn which weeks have games."""
+def week_game_counts(season):
+    """Read the saved games file -> {week: (total_games, completed_games)}."""
     games_path = GAMES_DIR / f"season={season}" / "games.json"
     if not games_path.exists():
         raise FileNotFoundError(
             f"{games_path} not found — run ingest_games.py --season {season} first."
         )
     games = json.loads(games_path.read_text())
-    return sorted(set(g["week"] for g in games))
+    counts = {}
+    for g in games:
+        total, done = counts.get(g["week"], (0, 0))
+        counts[g["week"]] = (total + 1, done + (1 if g["completed"] else 0))
+    return counts
 
 
 def ingest_stats(season):
-    weeks = weeks_for_season(season)
-    print(f"Season {season}: {len(weeks)} weeks to fetch (weeks {weeks[0]}-{weeks[-1]})")
+    counts = week_game_counts(season)
+    weeks = sorted(counts)
+    current = is_current_season(season)
+    label = " [live season]" if current else ""
+    print(f"Season {season}: weeks {weeks[0]}-{weeks[-1]}{label}")
 
     for week in weeks:
+        total, done = counts[week]
         out_dir = RAW_DIR / f"season={season}" / f"week={week}"
         out_path = out_dir / "stats.json"
 
-        # Per-week caching: skip any week we've already pulled.
-        if out_path.exists():
-            print(f"  week {week}: cached, skipping")
-            continue
+        if current:
+            # Live season: skip unplayed weeks, cache finalized weeks, refetch the
+            # in-progress week (where not all games are complete yet).
+            if done == 0:
+                print(f"  week {week}: no completed games yet, skipping")
+                continue
+            if out_path.exists() and done == total:
+                print(f"  week {week}: finalized, cached")
+                continue
+        else:
+            # Finished season: everything is immutable, skip anything already pulled.
+            if out_path.exists():
+                print(f"  week {week}: cached, skipping")
+                continue
 
         stats = get(
             "/games/teams",
@@ -52,7 +70,7 @@ def ingest_stats(season):
 
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(stats, indent=2))
-        print(f"  week {week}: saved {len(stats)} game records")
+        print(f"  week {week}: saved {len(stats)} records ({done}/{total} games complete)")
 
 
 if __name__ == "__main__":

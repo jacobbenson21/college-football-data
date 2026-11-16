@@ -19,7 +19,7 @@ from airflow.operators.bash import BashOperator
 PROJECT = "/opt/airflow/project"
 PY = "/opt/app-venv/bin/python"
 DBT = "/opt/app-venv/bin/dbt"
-SEASONS = "2022 2023 2024 2025"
+SEASONS = "2022 2023 2024 2025 2026"  # 2026 is the live season (season-aware caching)
 
 default_args = {
     "owner": "jake",

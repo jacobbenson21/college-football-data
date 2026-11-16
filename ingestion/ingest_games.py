@@ -8,7 +8,7 @@ import argparse
 import json
 from pathlib import Path
 
-from api_client import get
+from api_client import get, is_current_season
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = REPO_ROOT / "data" / "raw" / "games"
@@ -18,7 +18,8 @@ def ingest_games(season):
     out_dir = RAW_DIR / f"season={season}"
     out_path = out_dir / "games.json"
 
-    if out_path.exists():
+    # Skip finished seasons; always refetch the current season (scores/new weeks).
+    if out_path.exists() and not is_current_season(season):
         print(f"Cached — {out_path} already exists, skipping API call.")
         return
 

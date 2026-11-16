@@ -28,8 +28,9 @@ load_dotenv()
 STAGE = "CFB.RAW.processed_stage"
 BUCKET_URL = "s3://cfb-data-pipeline-jacobbenson21/processed/"
 
-# dataset -> expected row count (sanity check against the processed Parquet)
-EXPECTED = {"teams": 534, "games": 3483, "game_stats": 6966}
+# Datasets to load (row counts grow with the live season, so correctness is
+# validated by dbt tests downstream, not by hardcoded expected counts here).
+DATASETS = ["teams", "games", "game_stats"]
 
 
 def connect():
@@ -95,12 +96,11 @@ def load_dataset(cur, dataset):
         """
     )
 
-    # 4. Validate the loaded row count against the processed Parquet.
+    # 4. Report the loaded row count (sanity: must be non-zero).
     cur.execute(f"SELECT COUNT(*) FROM {table}")
     actual = cur.fetchone()[0]
-    expected = EXPECTED.get(dataset)
-    flag = "OK" if actual == expected else "!! MISMATCH"
-    print(f"{table}: {actual} rows (expected {expected}) [{flag}]")
+    flag = "OK" if actual > 0 else "!! EMPTY"
+    print(f"{table}: {actual} rows loaded [{flag}]")
 
 
 def main():
@@ -109,7 +109,7 @@ def main():
         cur = conn.cursor()
         cur.execute("USE SCHEMA CFB.RAW")
         ensure_stage(cur)
-        for dataset in EXPECTED:
+        for dataset in DATASETS:
             load_dataset(cur, dataset)
     finally:
         conn.close()
