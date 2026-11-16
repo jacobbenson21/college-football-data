@@ -54,3 +54,23 @@ models:
         tests:
           - accepted_values:
               values: ['home', 'away']
+
+  - name: team_season_summary
+    description: >
+      Team-season performance metrics aggregated from fact_game_stats (one row
+      per team per season), including for/against metrics via a self-join.
+    columns:
+      - name: team_season_key
+        description: Surrogate key, team_id + season.
+        tests:
+          - unique
+          - not_null
+      - name: team_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_teams')
+              field: team_id
+      - name: games_played
+        tests:
+          - not_null
