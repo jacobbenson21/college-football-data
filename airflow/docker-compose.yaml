@@ -14,6 +14,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     JAVA_HOME: /usr/lib/jvm/default-java
+    SPARK_MASTER: "local[2]"   # cap Spark cores so it doesn't starve the scheduler
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs

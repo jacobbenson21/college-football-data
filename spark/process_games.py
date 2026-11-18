@@ -14,10 +14,15 @@ Differences from process_teams.py:
 Run: python spark/process_games.py
 """
 
+import os
 from pathlib import Path
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
+
+# local[*] (all cores) locally; override to e.g. local[2] under Airflow so Spark
+# leaves CPU headroom for the scheduler (prevents heartbeat starvation).
+SPARK_MASTER = os.getenv("SPARK_MASTER", "local[*]")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RAW_GAMES = REPO_ROOT / "data" / "raw" / "games"
@@ -48,7 +53,7 @@ def side_columns(prefix):
 
 def main():
     spark = (
-        SparkSession.builder.appName("process_games").master("local[*]").getOrCreate()
+        SparkSession.builder.appName("process_games").master(SPARK_MASTER).getOrCreate()
     )
     spark.sparkContext.setLogLevel("WARN")
 

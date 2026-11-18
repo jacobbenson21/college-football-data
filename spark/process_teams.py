@@ -6,10 +6,15 @@ Writes data/processed/teams/season=<year>/*.parquet
 Run: python spark/process_teams.py
 """
 
+import os
 from pathlib import Path
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
+
+# local[*] (all cores) locally; override to e.g. local[2] under Airflow so Spark
+# leaves CPU headroom for the scheduler (prevents heartbeat starvation).
+SPARK_MASTER = os.getenv("SPARK_MASTER", "local[*]")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RAW_TEAMS = REPO_ROOT / "data" / "raw" / "teams"
@@ -18,7 +23,7 @@ OUT_TEAMS = REPO_ROOT / "data" / "processed" / "teams"
 
 def main():
     spark = (
-        SparkSession.builder.appName("process_teams").master("local[*]").getOrCreate()
+        SparkSession.builder.appName("process_teams").master(SPARK_MASTER).getOrCreate()
     )
     spark.sparkContext.setLogLevel("WARN")
 

@@ -68,6 +68,7 @@ with DAG(
             f"&& {PY} spark/process_games.py "
             f"&& {PY} spark/process_stats.py"
         ),
+        execution_timeout=timedelta(minutes=30),  # fail fast instead of hanging for hours
     )
 
     upload_to_s3 = BashOperator(
