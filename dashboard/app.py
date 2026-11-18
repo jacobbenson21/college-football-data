@@ -16,8 +16,7 @@ load_dotenv()
 st.set_page_config(page_title="College Football Analytics", page_icon="🏈", layout="wide")
 
 
-@st.cache_resource
-def get_connection():
+def _connect():
     return snowflake.connector.connect(
         account=os.getenv("SNOWFLAKE_ACCOUNT"),
         user=os.getenv("SNOWFLAKE_USER"),
@@ -30,9 +29,12 @@ def get_connection():
 
 @st.cache_data(ttl=600)
 def query(sql: str) -> pd.DataFrame:
-    cur = get_connection().cursor()
-    cur.execute(sql)
-    return cur.fetch_pandas_all()
+    # Fresh connection per query (results are cached for 10 min, so Snowflake is
+    # hit rarely); avoids a long-lived cached session going stale/expiring.
+    with _connect() as conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        return cur.fetch_pandas_all()
 
 
 # ---------------------------------------------------------------- header / sidebar
